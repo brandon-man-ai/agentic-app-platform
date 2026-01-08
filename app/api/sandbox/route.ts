@@ -21,6 +21,11 @@ export async function POST(req: Request) {
   console.log('fragment', fragment)
   console.log('userID', userID)
   // console.log('apiKey', apiKey)
+  
+  // Display E2B API key
+  console.log('=== E2B API KEY ===')
+  console.log('E2B_API_KEY:', process.env.E2B_API_KEY ? `${process.env.E2B_API_KEY.slice(0, 15)}...` : 'NOT SET')
+  console.log('==================')
 
   // Create an interpreter or a sandbox
   const sbx = await Sandbox.create(fragment.template, {
@@ -29,6 +34,7 @@ export async function POST(req: Request) {
       userID: userID ?? '',
       teamID: teamID ?? '',
     },
+    apiKey: process.env.E2B_API_KEY,
     timeoutMs: sandboxTimeout,
     ...(teamID && accessToken
       ? {

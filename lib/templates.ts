@@ -3,7 +3,8 @@ export function getTemplateIdSuffix(id: string) {
   return isDev ? `${id}-dev` : id
 }
 
-export function getTemplateId(id: string) {
+export function getTemplateId(id: string | undefined) {
+  if (!id) return ''
   return id.replace(/-dev$/, '')
 }
 

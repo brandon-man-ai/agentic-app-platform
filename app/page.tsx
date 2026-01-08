@@ -5,7 +5,6 @@ import { AuthDialog } from '@/components/auth-dialog'
 import { Chat } from '@/components/chat'
 import { ChatInput } from '@/components/chat-input'
 import { ChatPicker } from '@/components/chat-picker'
-import { ChatSettings } from '@/components/chat-settings'
 import { NavBar } from '@/components/navbar'
 import { Preview } from '@/components/preview'
 import { useAuth } from '@/lib/auth'
@@ -31,7 +30,7 @@ export default function Home() {
   const [languageModel, setLanguageModel] = useLocalStorage<LLMModelConfig>(
     'languageModel',
     {
-      model: 'claude-sonnet-4-20250514',
+      model: 'gpt-5',
     },
   )
 
@@ -47,7 +46,7 @@ export default function Home() {
   const [isRateLimited, setIsRateLimited] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const { session, userTeam } = useAuth(setAuthDialog, setAuthView)
-  const [useMorphApply, setUseMorphApply] = useLocalStorage(
+  const [useMorphApply] = useLocalStorage(
     'useMorphApply',
     process.env.NEXT_PUBLIC_USE_MORPH_APPLY === 'true',
   )
@@ -60,7 +59,7 @@ export default function Home() {
   })
 
   const defaultModel = filteredModels.find(
-    (model) => model.id === 'claude-sonnet-4-20250514',
+    (model) => model.id === 'gpt-5',
   ) || filteredModels[0]
 
   const currentModel = filteredModels.find(
@@ -82,7 +81,12 @@ export default function Home() {
   // Determine which API to use based on morph toggle and existing fragment
   const shouldUseMorph =
     useMorphApply && fragment && fragment.code && fragment.file_path
-  const apiEndpoint = shouldUseMorph ? '/api/morph-chat' : '/api/chat'
+  
+  // Use Python backend if NEXT_PUBLIC_API_URL is set, otherwise use Next.js API routes
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+  const apiEndpoint = shouldUseMorph 
+    ? `${apiBaseUrl}/api/morph-chat` 
+    : `${apiBaseUrl}/api/chat`
 
   const { object, submit, isLoading, stop, error } = useObject({
     api: apiEndpoint,
@@ -104,8 +108,11 @@ export default function Home() {
           template: fragment?.template,
         })
 
-        const response = await fetch('/api/sandbox', {
+        const response = await fetch(`${apiBaseUrl}/api/sandbox`, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
             fragment,
             userID: session?.user?.id,
@@ -244,10 +251,6 @@ export default function Home() {
       : console.warn('Supabase is not initialized')
   }
 
-  function handleLanguageModelChange(e: LLMModelConfig) {
-    setLanguageModel({ ...languageModel, ...e })
-  }
-
   function handleSocialClick(target: 'github' | 'x' | 'discord') {
     if (target === 'github') {
       window.open('https://github.com/e2b-dev/fragments', '_blank')
@@ -326,24 +329,8 @@ export default function Home() {
             isMultiModal={currentModel?.multiModal || false}
             files={files}
             handleFileChange={handleFileChange}
-          >
-            <ChatPicker
-              templates={templates}
-              selectedTemplate={selectedTemplate}
-              onSelectedTemplateChange={setSelectedTemplate}
-              models={filteredModels}
-              languageModel={languageModel}
-              onLanguageModelChange={handleLanguageModelChange}
-            />
-            <ChatSettings
-              languageModel={languageModel}
-              onLanguageModelChange={handleLanguageModelChange}
-              apiKeyConfigurable={!process.env.NEXT_PUBLIC_NO_API_KEY_INPUT}
-              baseURLConfigurable={!process.env.NEXT_PUBLIC_NO_BASE_URL_INPUT}
-              useMorphApply={useMorphApply}
-              onUseMorphApplyChange={setUseMorphApply}
-            />
-          </ChatInput>
+          />
+
         </div>
         <Preview
           teamID={userTeam?.id}

@@ -1,0 +1,26 @@
+# FastAPI and server
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-dotenv==1.0.1
+
+# E2B SDK
+e2b-code-interpreter==1.0.3
+
+# LLM providers
+openai==1.50.0
+anthropic==0.34.0
+google-generativeai==0.8.0
+
+# Utilities
+pydantic==2.9.0
+httpx==0.27.0
+
+# Rate limiting
+slowapi==0.1.9
+
+# CORS
+python-multipart==0.0.9
+
+# Google Cloud Secret Manager
+google-cloud-secret-manager==2.18.1
+

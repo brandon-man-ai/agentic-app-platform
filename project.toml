@@ -1,0 +1,5 @@
+name = "agentic-app-platform"
+enable_secrets = true
+
+[metadata]
+owner = "brandon@applied.co"

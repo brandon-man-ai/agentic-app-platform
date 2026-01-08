@@ -52,6 +52,13 @@ export async function POST(req: Request) {
   // console.log('config', config)
 
   const { model: modelNameString, apiKey: modelApiKey, ...modelParams } = config
+  
+  // Display API keys
+  console.log('=== API KEYS ===')
+  console.log('OpenAI API Key (from config):', modelApiKey || 'NOT PROVIDED')
+  console.log('OpenAI API Key (from env):', process.env.OPENAI_API_KEY ? `${process.env.OPENAI_API_KEY.slice(0, 10)}...` : 'NOT SET')
+  console.log('Anthropic API Key (from env):', process.env.ANTHROPIC_API_KEY ? `${process.env.ANTHROPIC_API_KEY.slice(0, 10)}...` : 'NOT SET')
+  console.log('================')
   const modelClient = getModelClient(model, config)
 
   try {

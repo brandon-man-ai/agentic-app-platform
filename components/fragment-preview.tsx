@@ -10,6 +10,10 @@ import {
 } from '@/lib/types'
 
 export function FragmentPreview({ result }: { result: ExecutionResult }) {
+  if (!result?.template) {
+    return null
+  }
+  
   if (getTemplateId(result.template) === 'code-interpreter-v1') {
     return <FragmentInterpreter result={result as ExecutionResultInterpreter} />
   }

@@ -1,0 +1,23 @@
+# Copy this file to .env and fill in your API keys
+
+# E2B API Key - Get yours at https://e2b.dev/
+E2B_API_KEY=your-e2b-api-key
+
+# OpenAI API Key
+OPENAI_API_KEY=your-openai-api-key
+
+# Anthropic API Key
+ANTHROPIC_API_KEY=your-anthropic-api-key
+
+# Other LLM providers (optional)
+GROQ_API_KEY=
+TOGETHER_API_KEY=
+FIREWORKS_API_KEY=
+XAI_API_KEY=
+DEEPSEEK_API_KEY=
+GOOGLE_AI_API_KEY=
+
+# Server configuration
+PORT=8000
+NODE_ENV=development
+
