@@ -65,10 +65,11 @@ export function DeployDialog({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="p-4 w-80 flex flex-col gap-2">
-        <div className="text-sm font-semibold">Coming Soon 👀</div>
+        <div className="text-sm font-semibold">Deploy to App Platform</div>
         <div className="text-sm text-muted-foreground">
-         {/*} 
+          Coming Soon 👀
         </div>
+        {/*}
         <div className="text-sm text-muted-foreground">
           The fragment will be available up until the expiration date you choose
           and you&apos;ll be billed based on our{' '}
@@ -92,6 +93,8 @@ export function DeployDialog({
           </a>{' '}
           for longer expiration.
         </div>
+        */}
+        {/*
         <form className="flex flex-col gap-2" onSubmit={publishURL}>
           {publishedURL ? (
             <div className="flex items-center gap-2">
@@ -114,15 +117,15 @@ export function DeployDialog({
                 </SelectGroup>
               </SelectContent>
             </Select>
-          )}*/}
-          {/*<Button
+          )}
+          <Button
             type="submit"
             variant="default"
             disabled={publishedURL !== null}
           >
             {publishedURL ? 'Deployed' : 'Accept and deploy'}
-          </Button>*/}
-        </form>
+          </Button>
+        </form>*/}
       </DropdownMenuContent>
     </DropdownMenu>
   )
