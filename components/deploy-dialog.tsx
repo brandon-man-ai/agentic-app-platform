@@ -65,10 +65,9 @@ export function DeployDialog({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="p-4 w-80 flex flex-col gap-2">
-        <div className="text-sm font-semibold">Deploy to App Platform</div>
+        <div className="text-sm font-semibold">Coming Soon 👀</div>
         <div className="text-sm text-muted-foreground">
-          Deploying the app will make it publicly accessible to others via
-          link.
+         {/*} 
         </div>
         <div className="text-sm text-muted-foreground">
           The fragment will be available up until the expiration date you choose
@@ -115,7 +114,7 @@ export function DeployDialog({
                 </SelectGroup>
               </SelectContent>
             </Select>
-          )}
+          )}*/}
           {/*<Button
             type="submit"
             variant="default"
