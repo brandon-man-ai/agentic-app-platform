@@ -1,10 +1,7 @@
 'use client'
 
-import { ViewType } from '@/components/auth'
-import { AuthDialog } from '@/components/auth-dialog'
 import { Chat } from '@/components/chat'
 import { ChatInput } from '@/components/chat-input'
-import { ChatPicker } from '@/components/chat-picker'
 import { NavBar } from '@/components/navbar'
 import { Preview } from '@/components/preview'
 import { useAuth } from '@/lib/auth'
@@ -12,7 +9,6 @@ import { Message, toAISDKMessages, toMessageImage } from '@/lib/messages'
 import { LLMModelConfig } from '@/lib/models'
 import modelsList from '@/lib/models.json'
 import { FragmentSchema, fragmentSchema as schema } from '@/lib/schema'
-import { supabase } from '@/lib/supabase'
 import templates from '@/lib/templates'
 import { ExecutionResult } from '@/lib/types'
 import { DeepPartial } from 'ai'
@@ -41,11 +37,9 @@ export default function Home() {
   const [fragment, setFragment] = useState<DeepPartial<FragmentSchema>>()
   const [currentTab, setCurrentTab] = useState<'code' | 'fragment'>('code')
   const [isPreviewLoading, setIsPreviewLoading] = useState(false)
-  const [isAuthDialogOpen, setAuthDialog] = useState(false)
-  const [authView, setAuthView] = useState<ViewType>('sign_in')
   const [isRateLimited, setIsRateLimited] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const { session, userTeam } = useAuth(setAuthDialog, setAuthView)
+  const { session, userTeam, isLoading: isAuthLoading } = useAuth()
   const [useMorphApply] = useLocalStorage(
     'useMorphApply',
     process.env.NEXT_PUBLIC_USE_MORPH_APPLY === 'true',
@@ -81,11 +75,11 @@ export default function Home() {
   // Determine which API to use based on morph toggle and existing fragment
   const shouldUseMorph =
     useMorphApply && fragment && fragment.code && fragment.file_path
-  
+
   // Use Python backend if NEXT_PUBLIC_API_URL is set, otherwise use Next.js API routes
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || ''
-  const apiEndpoint = shouldUseMorph 
-    ? `${apiBaseUrl}/api/morph-chat` 
+  const apiEndpoint = shouldUseMorph
+    ? `${apiBaseUrl}/api/morph-chat`
     : `${apiBaseUrl}/api/chat`
 
   const { object, submit, isLoading, stop, error } = useObject({
@@ -179,7 +173,8 @@ export default function Home() {
     e.preventDefault()
 
     if (!session) {
-      return setAuthDialog(true)
+      console.warn('User not authenticated')
+      return
     }
 
     if (isLoading) {
@@ -245,12 +240,6 @@ export default function Home() {
     setFiles(change)
   }
 
-  function logout() {
-    supabase
-      ? supabase.auth.signOut()
-      : console.warn('Supabase is not initialized')
-  }
-
   function handleSocialClick(target: 'github' | 'x' | 'discord') {
     if (target === 'github') {
       window.open('https://github.com/e2b-dev/fragments', '_blank')
@@ -289,22 +278,12 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen max-h-screen">
-      {supabase && (
-        <AuthDialog
-          open={isAuthDialogOpen}
-          setOpen={setAuthDialog}
-          view={authView}
-          supabase={supabase}
-        />
-      )}
       <div className="grid w-full md:grid-cols-2">
         <div
           className={`flex flex-col w-full max-h-full max-w-[800px] mx-auto px-4 overflow-auto ${fragment ? 'col-span-1' : 'col-span-2'}`}
         >
           <NavBar
             session={session}
-            showLogin={() => setAuthDialog(true)}
-            signOut={logout}
             onSocialClick={handleSocialClick}
             onClear={handleClearChat}
             canClear={messages.length > 0}
@@ -316,10 +295,18 @@ export default function Home() {
             isLoading={isLoading}
             setCurrentPreview={setCurrentPreview}
           />
+          {!isAuthLoading && !session && (
+            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-center">
+              <p className="text-destructive font-medium">Authentication Required</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                You must be authenticated to use this application. Please ensure you are accessing this app through the authenticated platform.
+              </p>
+            </div>
+          )}
           <ChatInput
             retry={retry}
-            isErrored={error !== undefined}
-            errorMessage={errorMessage}
+            isErrored={error !== undefined || (!isAuthLoading && !session)}
+            errorMessage={!session && !isAuthLoading ? 'Authentication required' : errorMessage}
             isLoading={isLoading}
             isRateLimited={isRateLimited}
             stop={stop}

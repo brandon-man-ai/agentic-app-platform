@@ -1,104 +1,46 @@
-import { supabase } from './supabase'
-import { ViewType } from '@/components/auth'
-import { Session } from '@supabase/supabase-js'
-import { usePostHog } from 'posthog-js/react'
-import { useState, useEffect } from 'react'
+import { useUser } from './user-context'
+import { UserTeam } from './user-types'
 
-type UserTeam = {
-  email: string
-  id: string
-  name: string
-  tier: string
-}
-
-export async function getUserTeam(
-  session: Session,
-): Promise<UserTeam | undefined> {
-  const { data: defaultTeam } = await supabase!
-    .from('users_teams')
-    .select('teams (id, name, tier, email)')
-    .eq('user_id', session?.user.id)
-    .eq('is_default', true)
-    .single()
-
-  return defaultTeam?.teams as unknown as UserTeam
-}
-
+/**
+ * Simplified useAuth hook that wraps useUser context.
+ * Maintains API compatibility with existing components.
+ *
+ * Note: The setAuthDialog and setAuthView parameters are kept for backward
+ * compatibility but are no longer used since auth is handled externally.
+ */
 export function useAuth(
-  setAuthDialog: (value: boolean) => void,
-  setAuthView: (value: ViewType) => void,
+  _setAuthDialog?: (value: boolean) => void,
+  _setAuthView?: (value: string) => void,
 ) {
-  const [session, setSession] = useState<Session | null>(null)
-  const [userTeam, setUserTeam] = useState<UserTeam | undefined>(undefined)
-  const [recovery, setRecovery] = useState(false)
-  const posthog = usePostHog()
+  const { session, isLoading } = useUser()
 
-  useEffect(() => {
-    if (!supabase) {
-      console.warn('Supabase is not initialized')
-      return setSession({ user: { email: 'demo@e2b.dev' } } as Session)
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session) {
-        getUserTeam(session).then(setUserTeam)
-        if (!session.user.user_metadata.is_fragments_user) {
-          supabase?.auth.updateUser({
-            data: { is_fragments_user: true },
-          })
-        }
-        posthog.identify(session?.user.id, {
-          email: session?.user.email,
-          supabase_id: session?.user.id,
-        })
-        posthog.capture('sign_in')
+  // Convert to Supabase-like session format for compatibility with existing code
+  const compatSession = session
+    ? {
+        user: {
+          id: session.user.id,
+          email: session.user.email,
+          user_metadata: {
+            avatar_url: session.user.avatar_url,
+          },
+        },
+        access_token: session.access_token,
       }
-    })
+    : null
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-
-      if (_event === 'PASSWORD_RECOVERY') {
-        setRecovery(true)
-        setAuthView('update_password')
-        setAuthDialog(true)
+  // Create userTeam from user info for backward compatibility
+  const userTeam: UserTeam | undefined = session
+    ? {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name || session.user.email,
+        tier: 'default',
       }
-
-      if (_event === 'USER_UPDATED' && recovery) {
-        setRecovery(false)
-      }
-
-      if (_event === 'SIGNED_IN' && !recovery) {
-        getUserTeam(session as Session).then(setUserTeam)
-        setAuthDialog(false)
-        if (!session?.user.user_metadata.is_fragments_user) {
-          supabase?.auth.updateUser({
-            data: { is_fragments_user: true },
-          })
-        }
-        posthog.identify(session?.user.id, {
-          email: session?.user.email,
-          supabase_id: session?.user.id,
-        })
-        posthog.capture('sign_in')
-      }
-
-      if (_event === 'SIGNED_OUT') {
-        setAuthView('sign_in')
-        posthog.capture('sign_out')
-        posthog.reset()
-        setRecovery(false)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [recovery, setAuthDialog, setAuthView, posthog])
+    : undefined
 
   return {
-    session,
+    session: compatSession,
     userTeam,
+    isLoading,
   }
 }

@@ -9,6 +9,13 @@ node_modules
 # testing
 /coverage
 
+# project
+project.toml
+.env
+.env.local
+backend/.env
+
+
 # next.js
 /.next/
 /out/

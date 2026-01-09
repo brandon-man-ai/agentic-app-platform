@@ -21,23 +21,31 @@ import {
   GitHubLogoIcon,
   TwitterLogoIcon,
 } from '@radix-ui/react-icons'
-import { Session } from '@supabase/supabase-js'
-import { ArrowRight, LogOut, Trash, Undo } from 'lucide-react'
-import Link from 'next/link'
+import { Trash, Undo, User } from 'lucide-react'
+
+/**
+ * Session type for header-based authentication
+ */
+interface UserSession {
+  user: {
+    id: string
+    email?: string
+    user_metadata?: {
+      avatar_url?: string
+    }
+  }
+  access_token?: string
+}
 
 export function NavBar({
   session,
-  showLogin,
-  signOut,
   onClear,
   canClear,
   onSocialClick,
   onUndo,
   canUndo,
 }: {
-  session: Session | null
-  showLogin: () => void
-  signOut: () => void
+  session: UserSession | null
   onClear: () => void
   canClear: boolean
   onSocialClick: (target: 'github' | 'x' | 'discord') => void
@@ -136,18 +144,19 @@ export function NavBar({
                 <TwitterLogoIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                 Follow us on X
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={signOut}>
-                <LogOut className="mr-2 h-4 w-4 text-muted-foreground" />
-                Sign out
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button variant="default" onClick={showLogin}>
-            Sign in
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Not signed in</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
     </nav>
