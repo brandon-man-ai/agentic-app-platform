@@ -9,23 +9,7 @@ export function getTemplateId(id: string | undefined) {
 }
 
 const templates = {
-  'code-interpreter-v1': {
-    name: 'Python data analyst',
-    lib: [
-      'python',
-      'jupyter',
-      'numpy',
-      'pandas',
-      'matplotlib',
-      'seaborn',
-      'plotly',
-    ],
-    file: 'script.py',
-    instructions:
-      'Runs code as a Jupyter notebook cell. Strong data analysis angle. Can use complex visualisation to explain results.',
-    port: null,
-  },
-  [getTemplateIdSuffix('nextjs-developer')]: {
+ [getTemplateIdSuffix('nextjs-developer')]: {
     name: 'Next.js developer',
     lib: [
       'nextjs@14.2.5',
@@ -41,7 +25,27 @@ const templates = {
     instructions:
       'A Next.js 13+ app that reloads automatically. Using the pages router.',
     port: 3000,
+  }
+}
+
+/**
+   'code-interpreter-v1': {
+    name: 'Python data analyst',
+    lib: [
+      'python',
+      'jupyter',
+      'numpy',
+      'pandas',
+      'matplotlib',
+      'seaborn',
+      'plotly',
+    ],
+    file: 'script.py',
+    instructions:
+      'Runs code as a Jupyter notebook cell. Strong data analysis angle. Can use complex visualisation to explain results.',
+    port: null,
   },
+ * ,
   [getTemplateIdSuffix('vue-developer')]: {
     name: 'Vue.js developer',
     lib: ['vue@latest', 'nuxt@3.13.0', 'tailwindcss'],
@@ -81,8 +85,8 @@ const templates = {
       'A gradio app. Gradio Blocks/Interface should be called demo.',
     port: 7860,
   },
-}
 
+ */
 export type Templates = typeof templates
 export default templates
 
